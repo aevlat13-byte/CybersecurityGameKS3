@@ -7,7 +7,8 @@ A browser-based version of the KS3 classroom game **Under Attack**. Students act
 2. Spend your budget on protections in the shop.
 3. Investigate an incident by choosing the attack type and deciding if your protections stop it.
 4. Review feedback and move to the next round.
-5. After three rounds, read the summary and reflect on the protection methods.
+5. Use the sound toggle (top-right) if you want audio cues on or off.
+6. After three rounds, read the summary and reflect on the protection methods.
 
 ## Teacher guidance
 - Encourage students to discuss why certain protections help.
