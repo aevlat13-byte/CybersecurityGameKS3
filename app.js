@@ -379,7 +379,10 @@ const submitInvestigation = () => {
   if (attackCorrect) {
     state.score += 1;
   }
-  if (protectionCorrect && hasCounter) {
+  if (protectionCorrect) {
+    state.score += 1;
+  }
+  if (hasCounter) {
     state.score += 1;
   }
 
