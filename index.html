@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Under Attack: Cyber Defence</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="title-block">
+      <h1>Under Attack: Cyber Defence</h1>
+      <p class="subtitle">KS3 Cybersecurity Strategy Game</p>
+    </div>
+    <div class="scoreboard">
+      <div>
+        <span class="label">Round</span>
+        <span id="roundCounter">1</span>
+      </div>
+      <div>
+        <span class="label">Score</span>
+        <span id="scoreCounter">0</span>
+      </div>
+      <div>
+        <span class="label">Budget</span>
+        <span id="budgetCounter">£20,000</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="screen-intro" class="screen active">
+      <div class="panel">
+        <h2>Welcome, Network Manager</h2>
+        <p>You are the network manager for an online retailer. You must protect the business from cyber attacks while staying within budget.</p>
+        <button id="startGameBtn" class="primary">Start Game</button>
+      </div>
+    </section>
+
+    <section id="screen-shop" class="screen">
+      <div class="panel">
+        <h2>Budget &amp; Shopping Phase</h2>
+        <p>Select protections for your network. Stay within budget.</p>
+        <p id="shopMessage" class="helper-text"></p>
+        <div class="shop-grid" id="shopGrid"></div>
+      </div>
+      <aside class="panel network-panel">
+        <h3>Your Network</h3>
+        <ul id="selectedList" class="selected-list"></ul>
+        <button id="continueToIncidentBtn" class="primary" disabled>Continue to Incident</button>
+      </aside>
+    </section>
+
+    <section id="screen-incident" class="screen">
+      <div class="panel">
+        <h2>Incident Phase</h2>
+        <div id="incidentCard" class="incident-card"></div>
+        <button id="investigateBtn" class="primary">Investigate</button>
+      </div>
+    </section>
+
+    <section id="screen-investigation" class="screen">
+      <div class="panel">
+        <h2>Investigation Phase</h2>
+        <p id="incidentPrompt" class="prompt"></p>
+        <div class="question-block">
+          <h3>What type of attack is this?</h3>
+          <div id="attackOptions" class="options-grid"></div>
+        </div>
+        <div class="question-block">
+          <h3>Do your current protections stop the attack?</h3>
+          <div id="protectionOptions" class="options-grid"></div>
+        </div>
+        <button id="submitInvestigationBtn" class="primary" disabled>Submit Answers</button>
+      </div>
+    </section>
+
+    <section id="screen-feedback" class="screen">
+      <div class="panel">
+        <h2>Feedback Phase</h2>
+        <div id="feedbackContent" class="feedback-content"></div>
+        <button id="nextRoundBtn" class="primary">Next Round</button>
+      </div>
+    </section>
+
+    <section id="screen-end" class="screen">
+      <div class="panel">
+        <h2>Game Complete</h2>
+        <p class="final-score">Final Score: <span id="finalScore"></span></p>
+        <div id="summaryContent" class="summary"></div>
+        <div class="reflection">
+          <h3>Reflection</h3>
+          <p>Which protection methods were most important and why?</p>
+        </div>
+        <button id="restartBtn" class="primary">Play Again</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Designed for KS3 cybersecurity learning. Play responsibly.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
