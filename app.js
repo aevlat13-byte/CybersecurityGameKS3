@@ -1,6 +1,6 @@
 const STARTING_BUDGET = 20000;
 const ROUND_BUDGET = 20000;
-const TOTAL_ROUNDS = 3;
+const MAX_BUDGET = 40000;
 
 const iconSet = {
   shield: "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 3l7 4v5c0 5-3.5 9-7 9s-7-4-7-9V7l7-4z\"/></svg>",
@@ -115,6 +115,8 @@ const incidents = [
     icon: iconSet.breach
   }
 ];
+
+const TOTAL_ROUNDS = incidents.length;
 
 const state = {
   round: 1,
@@ -411,15 +413,19 @@ const renderFeedback = ({ attackCorrect, protectionCorrect, hasCounter, incident
   const protectionStatus = hasCounter
     ? `You had ${protectionsInUse.join(", ")} in place.`
     : "You did not have a matching protection in place.";
+  const attackClass = attackCorrect ? "correct" : "incorrect";
+  const protectionClass = protectionCorrect ? "correct" : "incorrect";
+  const attackIcon = attackCorrect ? "✓" : "✕";
+  const protectionIcon = protectionCorrect ? "✓" : "✕";
 
   feedbackContent.innerHTML = `
-    <div class="feedback-box">
+    <div class="feedback-box ${attackClass}">
       <h3>Attack Identification</h3>
-      <p>${attackCorrect ? "Correct" : "Not quite"}. This incident was <strong>${incident.attackType}</strong>.</p>
+      <p><span class="status-icon">${attackIcon}</span>${attackCorrect ? "Correct" : "Not quite"}. This incident was <strong>${incident.attackType}</strong>.</p>
     </div>
-    <div class="feedback-box">
+    <div class="feedback-box ${protectionClass}">
       <h3>Protection Check</h3>
-      <p>${protectionCorrect ? "Good call" : "Not quite"}. ${protectionStatus}</p>
+      <p><span class="status-icon">${protectionIcon}</span>${protectionCorrect ? "Good call" : "Not quite"}. ${protectionStatus}</p>
       <p><strong>Why:</strong> ${incident.explanation}</p>
       <p><strong>Helpful protections:</strong> ${protectionList}</p>
     </div>
@@ -435,7 +441,7 @@ const nextRound = () => {
     return;
   }
   state.round += 1;
-  state.budget += ROUND_BUDGET;
+  state.budget = Math.min(state.budget + ROUND_BUDGET, MAX_BUDGET);
   updateScoreboard();
   renderShop();
   showScreen(screens.shop);
