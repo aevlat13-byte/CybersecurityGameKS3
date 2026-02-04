@@ -399,12 +399,15 @@ main {
 
 .axis-label {
   position: absolute;
-  font-size: 0.85rem;
-  color: var(--muted);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .axis-label--y {
-  left: -10px;
+  left: -26px;
   top: 50%;
   transform: rotate(-90deg) translate(-50%, 0);
   transform-origin: left top;
@@ -412,8 +415,38 @@ main {
 
 .axis-label--x {
   left: 50%;
-  bottom: -28px;
+  bottom: -34px;
   transform: translateX(-50%);
+}
+
+.axis-marker {
+  position: absolute;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.axis-marker--y-low {
+  left: -16px;
+  bottom: 8px;
+  transform: rotate(-90deg);
+}
+
+.axis-marker--y-high {
+  left: -16px;
+  top: 6px;
+  transform: rotate(-90deg);
+}
+
+.axis-marker--x-low {
+  left: 6px;
+  bottom: -16px;
+}
+
+.axis-marker--x-high {
+  right: 6px;
+  bottom: -16px;
 }
 
 .risk-tray {
