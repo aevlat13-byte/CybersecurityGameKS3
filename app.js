@@ -24,6 +24,51 @@ const iconSet = {
   ad: "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M7 16l3-8 3 8\"/><path d=\"M15 12h2\"/></svg>"
 };
 
+const riskThreats = [
+  {
+    name: "Social engineering",
+    recommended: { x: 3, y: 3 },
+    explanation: "People are often targeted by tricking them into sharing information, so it can be likely and quite harmful.",
+    suggestions: ["Staff training", "Secure password policy"]
+  },
+  {
+    name: "Ransomware",
+    recommended: { x: 3, y: 4 },
+    explanation: "Ransomware can shut down a business quickly and cause major damage if it spreads.",
+    suggestions: ["Regular backups", "Anti-malware"]
+  },
+  {
+    name: "Botnet (vulnerability scanning)",
+    recommended: { x: 2, y: 2 },
+    explanation: "Automated scanning is common, but the impact depends on what it finds.",
+    suggestions: ["Upgrade all software", "Firewall"]
+  },
+  {
+    name: "Brute force",
+    recommended: { x: 3, y: 2 },
+    explanation: "Password guessing is frequent, but strong login controls reduce the impact.",
+    suggestions: ["Two-factor authentication", "Secure password policy"]
+  },
+  {
+    name: "DDoS",
+    recommended: { x: 4, y: 3 },
+    explanation: "DDoS attacks are very likely on public sites and can seriously disrupt service.",
+    suggestions: ["ISP traffic regulation", "CAPTCHA", "Firewall"]
+  },
+  {
+    name: "Virus",
+    recommended: { x: 2, y: 2 },
+    explanation: "Viruses still happen, but good protection can limit how much damage they cause.",
+    suggestions: ["Anti-virus", "Regular backups"]
+  },
+  {
+    name: "Internal threat",
+    recommended: { x: 2, y: 3 },
+    explanation: "Issues from inside the organisation are less likely but can be quite damaging if they happen.",
+    suggestions: ["Staff training", "Secure password policy"]
+  }
+];
+
 const protections = [
   { name: "Penetration testers", cost: 20000, description: "Ethical hackers who test your defences.", icon: iconSet.shield },
   { name: "Regular backups", cost: 10000, description: "Restores data quickly after attacks.", icon: iconSet.backup },
@@ -128,11 +173,19 @@ const state = {
   attackChoice: null,
   protectionChoice: null,
   incidentHistory: [],
-  effectiveProtections: new Map()
+  effectiveProtections: new Map(),
+  risk: {
+    placements: new Map(),
+    scores: new Map(),
+    selectedThreatId: null,
+    bonusAwarded: false,
+    recommendedProtections: []
+  }
 };
 
 const screens = {
   intro: document.getElementById("screen-intro"),
+  risk: document.getElementById("screen-risk"),
   shop: document.getElementById("screen-shop"),
   incident: document.getElementById("screen-incident"),
   investigation: document.getElementById("screen-investigation"),
@@ -158,6 +211,16 @@ const finalScore = document.getElementById("finalScore");
 const summaryContent = document.getElementById("summaryContent");
 const investigationProtections = document.getElementById("investigationProtections");
 const soundToggleBtn = document.getElementById("soundToggleBtn");
+const riskGrid = document.getElementById("riskGrid");
+const riskTray = document.getElementById("riskTray");
+const riskScoreValue = document.getElementById("riskScoreValue");
+const riskFeedback = document.getElementById("riskFeedback");
+const riskBonusMessage = document.getElementById("riskBonusMessage");
+const riskContinueBtn = document.getElementById("riskContinueBtn");
+const riskResetBtn = document.getElementById("riskResetBtn");
+const riskHintBtn = document.getElementById("riskHintBtn");
+const recommendedPanel = document.getElementById("recommendedPanel");
+const recommendedList = document.getElementById("recommendedList");
 
 const startGameBtn = document.getElementById("startGameBtn");
 const investigateBtn = document.getElementById("investigateBtn");
@@ -209,6 +272,165 @@ const playSound = (variant) => {
   });
 };
 
+const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+const buildRiskGrid = () => {
+  riskGrid.innerHTML = "";
+  for (let y = 4; y >= 1; y -= 1) {
+    for (let x = 1; x <= 4; x += 1) {
+      const cell = document.createElement("div");
+      cell.className = "risk-cell";
+      cell.dataset.x = String(x);
+      cell.dataset.y = String(y);
+      cell.addEventListener("dragover", (event) => event.preventDefault());
+      cell.addEventListener("drop", (event) => {
+        event.preventDefault();
+        const threatId = event.dataTransfer.getData("text/plain");
+        if (threatId) {
+          placeThreatInCell(threatId, cell);
+        }
+      });
+      cell.addEventListener("click", () => {
+        if (state.risk.selectedThreatId) {
+          placeThreatInCell(state.risk.selectedThreatId, cell);
+          state.risk.selectedThreatId = null;
+          highlightSelectedCard();
+        }
+      });
+      riskGrid.appendChild(cell);
+    }
+  }
+};
+
+const renderRiskTray = () => {
+  riskTray.innerHTML = "";
+  riskThreats.forEach((threat) => {
+    const threatId = slugify(threat.name);
+    const card = document.createElement("div");
+    card.className = "risk-card";
+    card.textContent = threat.name;
+    card.dataset.threatId = threatId;
+    card.draggable = true;
+    card.addEventListener("dragstart", (event) => {
+      event.dataTransfer.setData("text/plain", threatId);
+    });
+    card.addEventListener("click", () => {
+      state.risk.selectedThreatId = threatId;
+      highlightSelectedCard();
+    });
+    riskTray.appendChild(card);
+  });
+};
+
+const highlightSelectedCard = () => {
+  [...riskTray.children].forEach((card) => {
+    card.classList.toggle("selected", card.dataset.threatId === state.risk.selectedThreatId);
+  });
+};
+
+const findThreatById = (threatId) => riskThreats.find((threat) => slugify(threat.name) === threatId);
+
+const updateRiskScore = () => {
+  const score = [...state.risk.scores.values()].reduce((total, value) => total + value, 0);
+  riskScoreValue.textContent = score;
+  return score;
+};
+
+const updateRiskBonusMessage = (score) => {
+  if (score >= 10) {
+    riskBonusMessage.textContent = "Risk bonus unlocked! You will start with an extra £5,000 budget.";
+  } else {
+    riskBonusMessage.textContent = "No bonus this time, but you can still continue.";
+  }
+};
+
+const placeThreatInCell = (threatId, cell) => {
+  const threat = findThreatById(threatId);
+  if (!threat) return;
+  const existingCard = cell.querySelector(".risk-card");
+  if (existingCard) {
+    riskTray.appendChild(existingCard);
+    state.risk.placements.delete(existingCard.dataset.threatId);
+    state.risk.scores.delete(existingCard.dataset.threatId);
+  }
+
+  const card = [...riskTray.children].find((child) => child.dataset.threatId === threatId) ||
+    riskGrid.querySelector(`.risk-card[data-threat-id="${threatId}"]`);
+  if (card) {
+    cell.appendChild(card);
+  }
+
+  const placedX = Number(cell.dataset.x);
+  const placedY = Number(cell.dataset.y);
+  const dx = Math.abs(placedX - threat.recommended.x);
+  const dy = Math.abs(placedY - threat.recommended.y);
+  let points = 0;
+  let message = "Check again.";
+
+  if (dx === 0 && dy === 0) {
+    points = 2;
+    message = "Good reasoning.";
+  } else if (dx <= 1 && dy <= 1) {
+    points = 1;
+    message = "Close! Check again.";
+  }
+
+  state.risk.placements.set(threatId, { x: placedX, y: placedY });
+  state.risk.scores.set(threatId, points);
+  riskFeedback.textContent = `${message} ${threat.explanation}`;
+  playSound(points === 2 ? "success" : "select");
+
+  const score = updateRiskScore();
+  updateRiskBonusMessage(score);
+  riskContinueBtn.disabled = state.risk.placements.size !== riskThreats.length;
+};
+
+const resetRiskPlacements = () => {
+  state.risk.placements.clear();
+  state.risk.scores.clear();
+  state.risk.selectedThreatId = null;
+  riskFeedback.textContent = "";
+  riskBonusMessage.textContent = "";
+  riskContinueBtn.disabled = true;
+  renderRiskTray();
+  buildRiskGrid();
+  updateRiskScore();
+  highlightSelectedCard();
+};
+
+const showRiskHint = () => {
+  riskFeedback.textContent = "Hint: Low probability/low impact goes bottom-left. High probability/high impact goes top-right.";
+  const highlightCell = [...riskGrid.children].find(
+    (cell) => cell.dataset.x === "4" && cell.dataset.y === "4"
+  );
+  if (highlightCell) {
+    highlightCell.classList.add("highlight");
+    setTimeout(() => highlightCell.classList.remove("highlight"), 1600);
+  }
+};
+
+const applyRiskBonusAndRecommendations = () => {
+  const score = updateRiskScore();
+  if (score >= 10 && !state.risk.bonusAwarded) {
+    state.budget = Math.min(state.budget + 5000, MAX_BUDGET);
+    state.risk.bonusAwarded = true;
+  }
+
+  const rankedThreats = [...state.risk.placements.entries()]
+    .map(([threatId, placement]) => ({
+      threat: findThreatById(threatId),
+      score: placement.x + placement.y
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  const suggestions = new Set();
+  rankedThreats.forEach(({ threat }) => {
+    threat.suggestions.forEach((item) => suggestions.add(item));
+  });
+  state.risk.recommendedProtections = [...suggestions];
+};
+
 const showScreen = (screen) => {
   Object.values(screens).forEach((section) => section.classList.remove("active"));
   screen.classList.add("active");
@@ -225,6 +447,16 @@ const resetShopMessage = () => {
 };
 
 const renderShop = () => {
+  if (state.round === 1 && state.risk.recommendedProtections.length > 0) {
+    recommendedPanel.classList.remove("hidden");
+    recommendedList.innerHTML = state.risk.recommendedProtections
+      .map((item) => `<li>${item}</li>`)
+      .join("");
+  } else {
+    recommendedPanel.classList.add("hidden");
+    recommendedList.innerHTML = "";
+  }
+
   shopGrid.innerHTML = "";
   protections.forEach((item) => {
     const card = document.createElement("button");
@@ -292,9 +524,14 @@ const startGame = () => {
   state.incidentsRemaining = shuffle([...incidents]).slice(0, TOTAL_ROUNDS);
   state.incidentHistory = [];
   state.effectiveProtections = new Map();
+  state.risk.placements = new Map();
+  state.risk.scores = new Map();
+  state.risk.selectedThreatId = null;
+  state.risk.bonusAwarded = false;
+  state.risk.recommendedProtections = [];
   updateScoreboard();
-  renderShop();
-  showScreen(screens.shop);
+  resetRiskPlacements();
+  showScreen(screens.risk);
 };
 
 const shuffle = (array) => {
@@ -481,6 +718,14 @@ investigateBtn.addEventListener("click", renderInvestigation);
 submitInvestigationBtn.addEventListener("click", submitInvestigation);
 nextRoundBtn.addEventListener("click", nextRound);
 restartBtn.addEventListener("click", startGame);
+riskResetBtn.addEventListener("click", resetRiskPlacements);
+riskHintBtn.addEventListener("click", showRiskHint);
+riskContinueBtn.addEventListener("click", () => {
+  applyRiskBonusAndRecommendations();
+  updateScoreboard();
+  renderShop();
+  showScreen(screens.shop);
+});
 soundToggleBtn.addEventListener("click", () => {
   audioState.enabled = !audioState.enabled;
   soundToggleBtn.textContent = `Sound: ${audioState.enabled ? "On" : "Off"}`;
@@ -489,4 +734,6 @@ soundToggleBtn.addEventListener("click", () => {
   }
 });
 
+buildRiskGrid();
+renderRiskTray();
 updateScoreboard();

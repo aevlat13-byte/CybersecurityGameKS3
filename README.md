@@ -33,3 +33,10 @@ A browser-based version of the KS3 classroom game **Under Attack**. Students act
 - Static site only (HTML/CSS/JS).
 - Works offline once loaded.
 - All data stored client-side in JavaScript objects.
+
+## Manual checks
+- Risk Assessment screen loads before the shop.
+- Drag and drop works for threat cards (and click + click placement works).
+- Risk score calculates and bonus message appears.
+- Recommended purchases panel appears in the first shop after the risk screen.
+- Game still completes end-to-end through all incidents.
