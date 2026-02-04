@@ -38,50 +38,10 @@
       </div>
     </section>
 
-    <section id="screen-risk" class="screen">
-      <div class="panel">
-        <h2>Risk Assessment: Probability vs Impact</h2>
-        <p>Before shopping, you will assess how risky different threats are for the retailer. A threat is riskier when it is both more likely and more damaging.</p>
-        <p>Place each threat on the grid. Think about how likely it is (probability) and how damaging it would be (impact).</p>
-        <div class="risk-layout">
-          <div class="risk-grid-wrapper">
-            <div class="axis-label axis-label--y">Impact (Low → High)</div>
-            <div class="axis-marker axis-marker--y-low">Low Impact</div>
-            <div class="axis-marker axis-marker--y-high">High Impact</div>
-            <div class="risk-grid" id="riskGrid"></div>
-            <div class="axis-label axis-label--x">Probability (Low → High)</div>
-            <div class="axis-marker axis-marker--x-low">Low Probability</div>
-            <div class="axis-marker axis-marker--x-high">High Probability</div>
-          </div>
-          <aside class="risk-tray">
-            <h3>Threat Cards</h3>
-            <p class="helper-text">Drag a card or click a card then a grid cell.</p>
-            <div id="riskTray" class="risk-tray-cards"></div>
-            <div class="risk-actions">
-              <button id="riskResetBtn" class="ghost">Reset placements</button>
-              <button id="riskHintBtn" class="ghost">Hint</button>
-            </div>
-          </aside>
-        </div>
-        <div class="risk-footer">
-          <div>
-            <p class="prompt">Risk Score: <span id="riskScoreValue">0</span> / 14</p>
-            <p id="riskFeedback" class="helper-text"></p>
-            <p id="riskBonusMessage" class="helper-text"></p>
-          </div>
-          <button id="riskContinueBtn" class="primary" disabled>Continue to Shop</button>
-        </div>
-      </div>
-    </section>
-
     <section id="screen-shop" class="screen">
       <div class="panel">
         <h2>Budget &amp; Shopping Phase</h2>
         <p>Select protections for your network. Stay within budget.</p>
-        <div id="recommendedPanel" class="recommendations hidden">
-          <h3>Recommended purchases (from your risk assessment)</h3>
-          <ul id="recommendedList"></ul>
-        </div>
         <p id="shopMessage" class="helper-text"></p>
         <div class="shop-grid" id="shopGrid"></div>
       </div>
